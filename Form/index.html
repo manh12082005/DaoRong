@@ -1,0 +1,1685 @@
+cat > /mnt/user-data/outputs/dao-rong-v2.html << 'HTMLEOF' <!DOCTYPE html>
+  <html lang="vi">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐉 ĐẢO RỒNG</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Fredoka+One&display=swap');
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box
+      }
+
+      :root {
+        --sky-top: #0a1628;
+        --sky-mid: #0e2d5a;
+        --sky-bot: #1a5a8a;
+        --gold: #FFD700;
+        --gold2: #FFA500;
+        --gem: #B44FFF;
+        --food-col: #4CAF50;
+        --hp-g: #00E676;
+        --hp-r: #FF1744;
+        --panel: #0d1b35ee;
+        --border: rgba(255, 215, 0, 0.5);
+        --btn1: #FF6B35;
+        --btn2: #FF3D00;
+      }
+
+      body {
+        font-family: 'Baloo 2', sans-serif;
+        background: var(--sky-top);
+        color: #fff;
+        overflow: hidden;
+        width: 100vw;
+        height: 100vh;
+        cursor: default
+      }
+
+      canvas {
+        display: block
+      }
+
+      /* HUD */
+      #hud {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 52px;
+        background: linear-gradient(180deg, rgba(5, 10, 25, .98), rgba(5, 10, 25, .85));
+        border-bottom: 1.5px solid rgba(255, 215, 0, .35);
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        gap: 6px;
+        z-index: 200
+      }
+
+      .hud-logo {
+        font-family: 'Fredoka One';
+        font-size: 20px;
+        color: var(--gold);
+        text-shadow: 0 0 15px #ff6b35, 0 2px 4px #000;
+        margin-right: 8px;
+        white-space: nowrap
+      }
+
+      .res {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(0, 0, 0, .5);
+        border: 1px solid rgba(255, 255, 255, .12);
+        border-radius: 16px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 700
+      }
+
+      .res .ico {
+        font-size: 15px
+      }
+
+      .res .val {
+        color: var(--gold)
+      }
+
+      .res .lbl {
+        color: #888;
+        font-size: 10px;
+        margin-left: 2px
+      }
+
+      .hud-right {
+        margin-left: auto;
+        display: flex;
+        gap: 6px
+      }
+
+      .hbtn {
+        background: linear-gradient(135deg, var(--btn1), var(--btn2));
+        border: none;
+        border-radius: 14px;
+        color: #fff;
+        font-weight: 800;
+        padding: 6px 14px;
+        font-size: 11px;
+        cursor: pointer;
+        font-family: 'Baloo 2';
+        transition: .15s;
+        white-space: nowrap;
+        box-shadow: 0 3px 8px rgba(255, 107, 53, .4)
+      }
+
+      .hbtn:hover {
+        filter: brightness(1.15);
+        transform: scale(1.04)
+      }
+
+      .hbtn.blue {
+        background: linear-gradient(135deg, #1565C0, #0D47A1);
+        box-shadow: 0 3px 8px rgba(21, 101, 192, .4)
+      }
+
+      .hbtn.purple {
+        background: linear-gradient(135deg, #6A1B9A, #4A148C);
+        box-shadow: 0 3px 8px rgba(106, 27, 154, .4)
+      }
+
+      /* BOTTOM NAV */
+      #nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 68px;
+        background: linear-gradient(0deg, rgba(5, 10, 25, .98), rgba(5, 10, 25, .85));
+        border-top: 1.5px solid rgba(255, 215, 0, .35);
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        z-index: 200
+      }
+
+      .nbtn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        background: none;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        padding: 6px 14px;
+        border-radius: 12px;
+        transition: .15s;
+        font-family: 'Baloo 2'
+      }
+
+      .nbtn:hover,
+      .nbtn.on {
+        color: var(--gold);
+        background: rgba(255, 215, 0, .08)
+      }
+
+      .nbtn .ni {
+        font-size: 22px
+      }
+
+      .nbtn .nl {
+        font-size: 9px;
+        font-weight: 700
+      }
+
+      /* MAIN CANVAS */
+      #gc {
+        position: fixed;
+        top: 52px;
+        left: 0;
+        right: 0;
+        bottom: 68px
+      }
+
+      /* PANELS */
+      .ov {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .75);
+        z-index: 300;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: .25s
+      }
+
+      .ov.on {
+        opacity: 1;
+        pointer-events: all
+      }
+
+      .pnl {
+        background: var(--panel);
+        border: 2px solid var(--border);
+        border-radius: 20px;
+        padding: 20px;
+        min-width: 340px;
+        max-width: 560px;
+        max-height: 82vh;
+        overflow-y: auto;
+        position: relative;
+        transform: scale(.92);
+        transition: .25s;
+        box-shadow: 0 0 50px rgba(255, 215, 0, .2), 0 20px 60px rgba(0, 0, 0, .8)
+      }
+
+      .ov.on .pnl {
+        transform: scale(1)
+      }
+
+      .ptitle {
+        font-family: 'Fredoka One';
+        font-size: 22px;
+        color: var(--gold);
+        text-align: center;
+        margin-bottom: 16px;
+        text-shadow: 0 0 15px var(--gold2)
+      }
+
+      .pclose {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        background: rgba(255, 50, 50, .3);
+        border: 1px solid rgba(255, 100, 100, .4);
+        color: #ff7777;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center
+      }
+
+      .pclose:hover {
+        background: rgba(255, 50, 50, .6)
+      }
+
+      /* Dragon grid */
+      .dgrid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px
+      }
+
+      .dcard {
+        background: rgba(255, 255, 255, .05);
+        border: 1.5px solid rgba(255, 255, 255, .1);
+        border-radius: 14px;
+        padding: 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: .2s
+      }
+
+      .dcard:hover {
+        background: rgba(255, 215, 0, .1);
+        border-color: var(--gold);
+        transform: translateY(-3px)
+      }
+
+      .dcard .dname {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--gold);
+        margin-top: 5px
+      }
+
+      .dcard .delem {
+        font-size: 10px;
+        color: #aaa
+      }
+
+      .dcard .dlv {
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--gold2)
+      }
+
+      /* Shop items */
+      .sitems {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px
+      }
+
+      .sitem {
+        background: rgba(255, 255, 255, .05);
+        border: 1.5px solid rgba(255, 255, 255, .1);
+        border-radius: 14px;
+        padding: 12px;
+        cursor: pointer;
+        transition: .2s;
+        display: flex;
+        gap: 10px;
+        align-items: center
+      }
+
+      .sitem:hover {
+        border-color: var(--gold);
+        background: rgba(255, 215, 0, .07)
+      }
+
+      .sitem .si-info {
+        flex: 1
+      }
+
+      .sitem .si-name {
+        font-size: 13px;
+        font-weight: 800;
+        color: #fff
+      }
+
+      .sitem .si-desc {
+        font-size: 10px;
+        color: #888;
+        margin-top: 2px
+      }
+
+      .sitem .si-cost {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--gold);
+        margin-top: 4px
+      }
+
+      /* Breed */
+      .bslots {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        margin: 16px 0;
+        align-items: center
+      }
+
+      .bslot {
+        width: 90px;
+        height: 90px;
+        border: 2px dashed rgba(255, 255, 255, .25);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 11px;
+        color: #555;
+        background: rgba(255, 255, 255, .03);
+        text-align: center;
+        flex-direction: column;
+        gap: 4px;
+        transition: .2s
+      }
+
+      .bslot.filled {
+        border-color: var(--gold);
+        background: rgba(255, 215, 0, .05)
+      }
+
+      .bslot:hover {
+        border-color: #aaa
+      }
+
+      .bplus {
+        font-size: 28px;
+        color: #444
+      }
+
+      /* Stat bars */
+      .sbar-wrap {
+        height: 6px;
+        background: #1a1a2e;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 4px
+      }
+
+      .sbar {
+        height: 100%;
+        border-radius: 3px;
+        transition: .5s
+      }
+
+      /* Action buttons */
+      .abtn {
+        border: none;
+        border-radius: 12px;
+        color: #fff;
+        font-weight: 800;
+        padding: 9px 18px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: .15s;
+        font-family: 'Baloo 2'
+      }
+
+      .abtn:hover {
+        filter: brightness(1.15);
+        transform: scale(1.04)
+      }
+
+      .abtn.green {
+        background: linear-gradient(135deg, #2E7D32, #1B5E20)
+      }
+
+      .abtn.orange {
+        background: linear-gradient(135deg, #E65100, #BF360C)
+      }
+
+      .abtn.purple {
+        background: linear-gradient(135deg, #6A1B9A, #4A148C)
+      }
+
+      .abtn.gray {
+        background: rgba(80, 80, 80, .5);
+        border: 1px solid #555;
+        color: #ccc
+      }
+
+      /* Toast */
+      #toast {
+        position: fixed;
+        bottom: 78px;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        background: rgba(5, 10, 25, .95);
+        color: var(--gold);
+        padding: 8px 18px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        font-weight: 700;
+        font-size: 13px;
+        opacity: 0;
+        transition: .3s;
+        z-index: 999;
+        white-space: nowrap
+      }
+
+      #toast.on {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0)
+      }
+
+      /* Float text */
+      .ft {
+        position: fixed;
+        pointer-events: none;
+        font-weight: 900;
+        font-size: 18px;
+        animation: ftAnim 1.4s ease-out forwards;
+        z-index: 999;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, .8)
+      }
+
+      @keyframes ftAnim {
+        from {
+          opacity: 1;
+          transform: translateY(0) scale(1)
+        }
+
+        to {
+          opacity: 0;
+          transform: translateY(-70px) scale(1.2)
+        }
+      }
+
+      /* Battle */
+      #battle {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 400;
+        background: radial-gradient(ellipse at 50% 20%, #1a0a40, #050510);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px
+      }
+
+      #battle.on {
+        display: flex
+      }
+
+      #bc {
+        border-radius: 18px;
+        border: 2px solid rgba(255, 215, 0, .3)
+      }
+
+      .bui {
+        display: flex;
+        justify-content: space-between;
+        width: 560px;
+        gap: 10px
+      }
+
+      .fpnl {
+        flex: 1;
+        background: rgba(255, 255, 255, .06);
+        border: 1.5px solid rgba(255, 255, 255, .12);
+        border-radius: 12px;
+        padding: 10px
+      }
+
+      .fpnl.enemy {
+        border-color: rgba(255, 50, 50, .35)
+      }
+
+      .fname {
+        font-weight: 800;
+        font-size: 13px
+      }
+
+      .blog {
+        width: 560px;
+        height: 58px;
+        background: rgba(0, 0, 0, .55);
+        border: 1px solid rgba(255, 255, 255, .1);
+        border-radius: 10px;
+        padding: 6px 10px;
+        font-size: 11px;
+        overflow-y: auto;
+        color: #bbb
+      }
+
+      .bbtns {
+        display: flex;
+        gap: 8px
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- HUD -->
+    <div id="hud">
+      <div class="hud-logo">🐉 ĐẢO RỒNG</div>
+      <div class="res"><span class="ico">🪙</span><span class="val" id="hgold">5000</span><span class="lbl">Vàng</span>
+      </div>
+      <div class="res"><span class="ico">🍖</span><span class="val" id="hfood">300</span><span class="lbl">Thức
+          ăn</span></div>
+      <div class="res"><span class="ico">💎</span><span class="val" id="hgem">20</span><span class="lbl">Gem</span>
+      </div>
+      <div class="res"><span class="ico">⚡</span><span class="val" id="henergy">10</span><span class="lbl">NL</span>
+      </div>
+      <div class="hud-right">
+        <button class="hbtn purple" onclick="openPanel('breed-ov')">🥚 Lai Tạo</button>
+        <button class="hbtn blue" onclick="openPanel('map-ov')">🗺️ Bản Đồ</button>
+      </div>
+    </div>
+
+    <!-- GAME CANVAS -->
+    <canvas id="gc"></canvas>
+
+    <!-- BOTTOM NAV -->
+    <div id="nav">
+      <button class="nbtn on" onclick="setTab(this,'island')"><span class="ni">🏝️</span><span
+          class="nl">ĐẢO</span></button>
+      <button class="nbtn" onclick="setTab(this,'dragons');openPanel('dragon-ov')"><span class="ni">🐉</span><span
+          class="nl">RỒNG</span></button>
+      <button class="nbtn" onclick="setTab(this,'shop');openPanel('shop-ov')"><span class="ni">🏪</span><span
+          class="nl">CỬA HÀNG</span></button>
+      <button class="nbtn" onclick="setTab(this,'battle');startBattle()"><span class="ni">⚔️</span><span
+          class="nl">CHIẾN ĐẤU</span></button>
+      <button class="nbtn" onclick="setTab(this,'rank');openPanel('rank-ov')"><span class="ni">🏆</span><span
+          class="nl">XẾP HẠNG</span></button>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast"></div>
+
+    <!-- ===== OVERLAYS ===== -->
+
+    <!-- Dragon collection -->
+    <div class="ov" id="dragon-ov">
+      <div class="pnl" style="min-width:420px">
+        <button class="pclose" onclick="closePanel('dragon-ov')">✕</button>
+        <div class="ptitle">🐉 Bộ Sưu Tập Rồng</div>
+        <div id="dragon-col-content"></div>
+      </div>
+    </div>
+
+    <!-- Shop -->
+    <div class="ov" id="shop-ov">
+      <div class="pnl" style="min-width:480px">
+        <button class="pclose" onclick="closePanel('shop-ov')">✕</button>
+        <div class="ptitle">🏪 Cửa Hàng</div>
+        <div id="shop-content"></div>
+      </div>
+    </div>
+
+    <!-- Breed -->
+    <div class="ov" id="breed-ov">
+      <div class="pnl" style="min-width:400px">
+        <button class="pclose" onclick="closePanel('breed-ov')">✕</button>
+        <div class="ptitle">🥚 Phòng Lai Tạo</div>
+        <div id="breed-content"></div>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div class="ov" id="map-ov">
+      <div class="pnl" style="min-width:460px">
+        <button class="pclose" onclick="closePanel('map-ov')">✕</button>
+        <div class="ptitle">🗺️ Bản Đồ Phiêu Lưu</div>
+        <div id="map-content"></div>
+      </div>
+    </div>
+
+    <!-- Dragon detail -->
+    <div class="ov" id="detail-ov">
+      <div class="pnl" style="min-width:320px">
+        <button class="pclose" onclick="closePanel('detail-ov')">✕</button>
+        <div id="detail-content"></div>
+      </div>
+    </div>
+
+    <!-- Rank -->
+    <div class="ov" id="rank-ov">
+      <div class="pnl" style="min-width:360px">
+        <button class="pclose" onclick="closePanel('rank-ov')">✕</button>
+        <div class="ptitle">🏆 Bảng Xếp Hạng</div>
+        <div id="rank-content"></div>
+      </div>
+    </div>
+
+    <!-- Battle -->
+    <div id="battle">
+      <canvas id="bc" width="560" height="260"></canvas>
+      <div class="bui">
+        <div class="fpnl">
+          <div class="fname" id="bpname">🐉 Rồng Của Bạn</div>
+          <div class="sbar-wrap" style="margin-top:6px">
+            <div class="sbar" id="bphp" style="background:linear-gradient(90deg,#00E676,#4CAF50);width:100%"></div>
+          </div>
+          <div id="bphpt" style="font-size:10px;color:#888;margin-top:2px">HP 100/100</div>
+        </div>
+        <div class="fpnl enemy">
+          <div class="fname" id="bename">👾 Kẻ Thù</div>
+          <div class="sbar-wrap" style="margin-top:6px">
+            <div class="sbar" id="behp" style="background:linear-gradient(90deg,#FF1744,#D50000);width:100%"></div>
+          </div>
+          <div id="behpt" style="font-size:10px;color:#888;margin-top:2px">HP 100/100</div>
+        </div>
+      </div>
+      <div class="blog" id="blog"></div>
+      <div class="bbtns">
+        <button class="abtn orange" onclick="doAttack('normal')">⚔️ Tấn Công</button>
+        <button class="abtn purple" onclick="doAttack('skill')">✨ Kỹ Năng</button>
+        <button class="abtn gray" onclick="endBattle()">🏃 Chạy</button>
+      </div>
+    </div>
+
+    <script>
+      // ============================================================
+      // DRAGON DEFINITIONS
+      // ============================================================
+      const DT = [
+        { id: 'fire', n: 'Rồng Vàng', e: '🔥', r: 1, c: ['#7f1d1d', '#ef4444', '#fb923c', '#fde68a'], cost: 500, skill: 'Cầu Lửa' },
+        { id: 'water', n: 'Hắc Long', e: '💧', r: 1, c: ['#1e3a8a', '#3b82f6', '#7dd3fc', '#e0f2fe'], cost: 500, skill: 'Sóng Thần' },
+        { id: 'earth', n: 'Kì Lân Đỏ', e: '🌿', r: 1, c: ['#14532d', '#16a34a', '#4ade80', '#d1fae5'], cost: 500, skill: 'Địa Chấn' },
+        { id: 'electric', n: 'Rồng Bạc', e: '⚡', r: 1, c: ['#713f12', '#f59e0b', '#fde68a', '#fffbeb'], cost: 500, skill: 'Sét Đánh' },
+        { id: 'ice', n: 'Tuyết Long', e: '❄️', r: 2, c: ['#1e3a5f', '#2563eb', '#93c5fd', '#eff6ff'], cost: 1200, skill: 'Bão Tuyết' },
+        { id: 'dark', n: 'Rồng Xương', e: '🌑', r: 2, c: ['#1e1b4b', '#4f46e5', '#a5b4fc', '#eef2ff'], cost: 1200, skill: 'Bóng Ma' },
+        { id: 'light', n: 'Khổng Tước', e: '✨', r: 2, c: ['#78350f', '#d97706', '#fbbf24', '#fef3c7'], cost: 1200, skill: 'Tia Thánh' },
+        { id: 'poison', n: 'Hồ Điệp Long', e: '☠️', r: 2, c: ['#14532d', '#15803d', '#86efac', '#f0fdf4'], cost: 1200, skill: 'Hơi Độc' },
+        { id: 'steam', n: 'Rồng Hơi Nước', e: '💨', r: 3, c: ['#164e63', '#0891b2', '#67e8f9', '#f0fdff'], cost: 0, skill: 'Nổ Hơi', bp: ['fire', 'water'] },
+        { id: 'thunder', n: 'Rồng Sấm Sét', e: '🌩️', r: 3, c: ['#1e3a8a', '#4f46e5', '#c4b5fd', '#faf5ff'], cost: 0, skill: 'Siêu Sét', bp: ['electric', 'water'] },
+        { id: 'demon', n: 'Rồng Ác Ma', e: '👿', r: 4, c: ['#0f0a1e', '#7c3aed', '#c4b5fd', '#fce7f3'], cost: 0, skill: 'Địa Ngục', bp: ['dark', 'ice'] },
+        { id: 'legend', n: 'Rồng Huyền Thoại', e: '🌟', r: 5, c: ['#1c0a00', '#d97706', '#fcd34d', '#fffbeb'], cost: 0, skill: 'Tuyệt Chiêu', bp: ['fire', 'dark'] },
+      ];
+      const DM = {};
+      DT.forEach(d => DM[d.id] = d);
+
+      const WEAK = {
+        fire: ['water', 'earth'], water: ['electric'], earth: ['fire', 'ice'],
+        electric: ['earth'], ice: ['fire'], dark: ['light'], light: ['dark'],
+        poison: ['electric'], steam: ['ice'], thunder: ['earth'], demon: ['light'], legend: []
+      };
+
+      // ============================================================
+      // GAME STATE
+      // ============================================================
+      let G = {
+        gold: 5000, food: 300, gem: 20, energy: 10,
+        dragons: [
+          { tid: 'fire', lv: 3, hp: 80, mhp: 80, xp: 45, n: 'Rồng Vàng', slot: 0 },
+          { tid: 'water', lv: 2, hp: 60, mhp: 60, xp: 10, n: 'Hắc Long', slot: 1 },
+          { tid: 'electric', lv: 1, hp: 40, mhp: 40, xp: 0, n: 'Rồng Bạc', slot: 2 },
+        ],
+        buildings: [
+          { t: 'farm', x: 0.22, y: 0.50, lv: 1, timer: 0, max: 30 },
+          { t: 'hatch', x: 0.68, y: 0.50, lv: 1 },
+          { t: 'arena', x: 0.45, y: 0.38, lv: 1 },
+          { t: 'market', x: 0.20, y: 0.70, lv: 1 },
+          { t: 'lab', x: 0.70, y: 0.70, lv: 1 },
+        ],
+        breedS1: null, breedS2: null, breedTimer: 0, breedResult: null, eggReady: false,
+        mapLv: 1, wins: 0,
+        camX: 0, camY: 0, zoom: 1,
+      };
+
+      // ============================================================
+      // CANVAS SETUP
+      // ============================================================
+      const canvas = document.getElementById('gc');
+      const ctx = canvas.getContext('2d');
+      let W, H;
+
+      function resize() {
+        const r = document.getElementById('hud').getBoundingClientRect();
+        const n = document.getElementById('nav').getBoundingClientRect();
+        canvas.width = W = window.innerWidth;
+        canvas.height = H = n.top - r.bottom;
+        canvas.style.top = r.bottom + 'px';
+        canvas.style.position = 'fixed';
+      }
+      window.addEventListener('resize', () => { resize(); });
+      resize();
+
+      // ============================================================
+      // DRAGON CANVAS RENDERER — CHIBI STYLE
+      // ============================================================
+      function drawDragonChibi(ctx, tid, cx, cy, size, facing = 1, glow = false, selected = false) {
+        // 1. Lấy ảnh từ bộ nhớ
+        const img = dragonSprites[tid];
+
+        // Nếu chưa load ảnh, trả về ngay để tránh lỗi
+        if (!img || img.complete === false) {
+          // Có thể vẽ một hình vuông đỏ để báo lỗi nếu ảnh chưa load
+          return;
+        }
+
+        const s = size / 100;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(facing, 1);
+
+        // 2. Vẽ bóng đổ (vẫn giữ để tạo cảm giác rồng đứng trên mặt đất)
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.beginPath();
+        ctx.ellipse(0, 35 * s, 25 * s, 8 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3. VẼ ẢNH RỒNG (Thay thế hoàn toàn các lệnh vẽ hình học cũ)
+        // -size/2: căn giữa theo chiều ngang
+        // -size/2: căn giữa theo chiều dọc
+        // size, size: kích thước hiển thị
+        ctx.drawImage(img, -size / 2, -size / 2, size, size);
+
+        // 4. Vòng chọn (Nếu rồng được chọn)
+        if (selected) {
+          ctx.strokeStyle = '#FFD700';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(0, 0, size * 0.6, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      // ======================================================
+      // KHỞI TẠO ẢNH (DÁN ĐOẠN NÀY VÀO PHÍA TRÊN CÙNG CỦA FILE)
+      // ======================================================
+      const dragonSprites = {
+        fire: new Image(),
+        water: new Image(),
+        electric: new Image(),
+        earth: new Image(),
+        ice: new Image(),
+        dark: new Image(),    
+        light: new Image(),
+        poison: new Image(),
+        steam: new Image(),   
+        thunder: new Image(),
+        demon: new Image(),
+
+      };
+
+      // Load ảnh
+      dragonSprites.fire.src = 'assets/fire_dragon.png';
+      dragonSprites.water.src = 'assets/water_dragon.png';
+      dragonSprites.electric.src = 'assets/electric_dragon.png';
+      dragonSprites.earth.src = 'assets/earth_dragon.png';
+      dragonSprites.ice.src = 'assets/ice_dragon.png';
+      dragonSprites.dark.src = 'assets/dark_dragon.png';
+      dragonSprites.light.src = 'assets/light_dragon.png';
+      dragonSprites.poison.src = 'assets/poison_dragon.png';
+      dragonSprites.steam.src = 'assets/steam_dragon.png';
+      dragonSprites.thunder.src = 'assets/thunder_dragon.png';
+      dragonSprites.demon.src = 'assets/demon_dragon.png';
+      //island
+      const islandAssets = {
+        bg: new Image(),
+        tree: new Image(),
+        gold: new Image()
+      };
+      islandAssets.bg.src = 'assets/island_bg.png'; // File ảnh nền đảo của bạn
+      islandAssets.tree.src = 'assets/tree.png';
+      islandAssets.gold.src = 'assets/gold_mine.png';
+      // ============================================================
+      // ISLAND DRAWING
+      // ============================================================
+      function drawIsland(ctx, W, H) {
+        const cx = W / 2, cy = H * 0.62;
+        const rx = W * 0.45, ry = H * 0.28;
+
+        // Sky gradient
+        const sky = ctx.createLinearGradient(0, 0, 0, H);
+        sky.addColorStop(0, '#0a1628'); sky.addColorStop(0.5, '#0e2d5a'); sky.addColorStop(1, '#1a5a8a');
+        ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+
+        // Stars
+        ctx.save();
+        for (let i = 0; i < 60; i++) {
+          const x = (Math.sin(i * 137.5) * 0.5 + 0.5) * W;
+          const y = (Math.sin(i * 97.3) * 0.5 + 0.5) * (H * 0.6);
+          const r = Math.random() * 1.5 + 0.5;
+          ctx.fillStyle = `rgba(255,255,255,${0.4 + Math.sin(Date.now() / 800 + i) * 0.4})`;
+          ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+
+        // Distant clouds
+        [[W * 0.1, H * 0.15, 120, 40], [W * 0.8, H * 0.1, 100, 35], [W * 0.5, H * 0.08, 150, 45]].forEach(([x, y, w, h]) => {
+          ctx.save(); ctx.globalAlpha = 0.12;
+          ctx.fillStyle = '#7ecef4';
+          ctx.beginPath(); ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(x - w * 0.3, y + h * 0.2, w * 0.6, h * 0.7, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(x + w * 0.3, y + h * 0.1, w * 0.5, h * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        });
+
+        // Water glow under island
+        const wg = ctx.createRadialGradient(cx, cy + ry * 0.5, 0, cx, cy + ry * 0.5, rx * 1.1);
+        wg.addColorStop(0, 'rgba(56,189,248,0.25)'); wg.addColorStop(1, 'transparent');
+        ctx.fillStyle = wg;
+        ctx.beginPath(); ctx.ellipse(cx, cy + ry * 0.5, rx * 1.15, ry * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Island shadow (underneath)
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.beginPath(); ctx.ellipse(cx, cy + ry * 0.85, rx * 0.85, ry * 0.18, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // Island base — rock/cliff edge
+        const cliffGrad = ctx.createLinearGradient(cx, cy + ry * 0.3, cx, cy + ry * 0.9);
+        cliffGrad.addColorStop(0, '#4a3728'); cliffGrad.addColorStop(0.5, '#3d2e22'); cliffGrad.addColorStop(1, '#2a1f17');
+        ctx.fillStyle = cliffGrad;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + ry * 0.5, rx * 0.92, ry * 0.55, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Cliff texture lines
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 2;
+        for (let i = 0; i < 5; i++) {
+          const py = cy + ry * 0.4 + i * ry * 0.08;
+          ctx.beginPath(); ctx.ellipse(cx, py, rx * 0.85 - i * 10, 6, 0, 0, Math.PI); ctx.stroke();
+        }
+
+        // Main island ground — lush green
+        const gGrad = ctx.createRadialGradient(cx - rx * 0.1, cy - ry * 0.2, ry * 0.1, cx, cy, rx);
+        gGrad.addColorStop(0, '#4ade80'); gGrad.addColorStop(0.3, '#22c55e'); gGrad.addColorStop(0.7, '#16a34a'); gGrad.addColorStop(1, '#166534');
+        ctx.fillStyle = gGrad;
+        ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry * 0.72, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Grass texture patches
+        ctx.save();
+        ctx.fillStyle = 'rgba(134,239,172,0.3)';
+        for (let i = 0; i < 12; i++) {
+          const a = i / 12 * Math.PI * 2, dr = 0.3 + Math.sin(i * 3) * 0.3;
+          const px = cx + Math.cos(a) * rx * dr, py = cy + Math.sin(a) * ry * dr * 0.4;
+          ctx.beginPath(); ctx.ellipse(px, py, rx * 0.06, ry * 0.04, a, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+
+        // Paths / dirt roads on island
+        ctx.save();
+        ctx.strokeStyle = 'rgba(161,120,80,0.4)'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+        ctx.setLineDash([12, 8]);
+        ctx.beginPath(); ctx.moveTo(cx - rx * 0.3, cy); ctx.lineTo(cx + rx * 0.3, cy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx, cy - ry * 0.3); ctx.lineTo(cx, cy + ry * 0.3); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        // Decorative trees / bushes around island edge
+        const treePts = [
+          [cx - rx * 0.7, cy - ry * 0.15], [cx + rx * 0.72, cy - ry * 0.1],
+          [cx - rx * 0.5, cy + ry * 0.3], [cx + rx * 0.55, cy + ry * 0.28],
+          [cx - rx * 0.15, cy - ry * 0.55], [cx + rx * 0.2, cy - ry * 0.5],
+          [cx - rx * 0.8, cy + ry * 0.1], [cx + rx * 0.8, cy + ry * 0.05],
+        ];
+        treePts.forEach(([tx, ty], i) => drawTree(ctx, tx, ty, 18 + i % 3 * 4));
+
+        // Small flowers
+        const flowerPts = [[cx - rx * 0.3, cy - ry * 0.3], [cx + rx * 0.35, cy - ry * 0.25], [cx - rx * 0.5, cy + ry * 0.1], [cx + rx * 0.4, cy + ry * 0.2]];
+        flowerPts.forEach(([fx, fy], i) => drawFlower(ctx, fx, fy, ['#ff6b6b', '#ff9f43', '#ffd700', '#a29bfe'][i]));
+
+        // Waterfall effect on one side
+        ctx.save();
+        const wfx = cx + rx * 0.85, wfy = cy;
+        const wfGrad = ctx.createLinearGradient(wfx, wfy - ry * 0.3, wfx, wfy + ry * 0.3);
+        wfGrad.addColorStop(0, 'rgba(147,210,248,0)'); wfGrad.addColorStop(0.5, 'rgba(147,210,248,0.4)'); wfGrad.addColorStop(1, 'rgba(147,210,248,0)');
+        ctx.fillStyle = wfGrad;
+        ctx.fillRect(wfx - 6, wfy - ry * 0.3, 12, ry * 0.6);
+        // Spray
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.beginPath(); ctx.ellipse(wfx, wfy + ry * 0.3, 18, 8, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      function drawTree(ctx, x, y, size) {
+        // Trunk
+        ctx.fillStyle = '#78350f';
+        ctx.beginPath(); ctx.rect(x - size * 0.15, y, size * 0.3, size * 0.6); ctx.fill();
+        // Canopy layers
+        [[0, '#166534', 1.1], [-.3, '#15803d', 0.9], [-.55, '#4ade80', 0.7]].forEach(([dy, col, sc]) => {
+          ctx.fillStyle = col;
+          ctx.beginPath(); ctx.arc(x, y + dy * size, size * sc * 0.55, 0, Math.PI * 2); ctx.fill();
+        });
+      }
+      function drawFlower(ctx, x, y, col) {
+        ctx.fillStyle = col;
+        for (let i = 0; i < 5; i++) {
+          const a = i / 5 * Math.PI * 2;
+          ctx.beginPath(); ctx.ellipse(x + Math.cos(a) * 6, y + Math.sin(a) * 6, 4, 4, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = '#fde68a';
+        ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // ============================================================
+      // BUILDING RENDERING
+      // ============================================================
+      const BICONS = { 'farm': '🌾', 'hatch': '🥚', 'arena': '⚔️', 'market': '🏪', 'lab': '🔬' };
+      const BNAMES = { 'farm': 'Trang Trại', 'hatch': 'Nhà Ấp', 'arena': 'Đấu Trường', 'market': 'Chợ Rồng', 'lab': 'Phòng Thí Nghiệm' };
+
+      function drawBuilding(ctx, b, W, H, cx, cy) {
+        const bx = cx + (b.x - 0.5) * W * 0.8;
+        const by = cy + (b.y - 0.5) * H * 0.85;
+        const sz = 36;
+
+        // Platform
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.beginPath(); ctx.ellipse(bx, by + sz * 0.6, sz * 0.8, sz * 0.2, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Building base
+        const bGrad = ctx.createLinearGradient(bx - sz, by - sz * 0.5, bx + sz, by + sz);
+        bGrad.addColorStop(0, '#3b5998'); bGrad.addColorStop(1, '#1a2a5e');
+        ctx.fillStyle = bGrad;
+        ctx.strokeStyle = 'rgba(255,215,0,0.5)'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(bx - sz, by - sz * 0.6, sz * 2, sz * 1.2, 8);
+        ctx.fill(); ctx.stroke();
+
+        // Roof
+        ctx.fillStyle = '#4a3728';
+        ctx.beginPath();
+        ctx.moveTo(bx - sz, by - sz * 0.6); ctx.lineTo(bx, by - sz * 1.4); ctx.lineTo(bx + sz, by - sz * 0.6); ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,215,0,0.4)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+        // Roof tiles
+        ctx.fillStyle = '#5d4037';
+        for (let i = 0; i < 4; i++) {
+          const tx = bx - sz + i * sz * 0.5 + sz * 0.25, ty = by - sz * 0.8;
+          ctx.beginPath(); ctx.rect(tx, ty, sz * 0.4, sz * 0.15); ctx.fill();
+        }
+
+        // Icon
+        ctx.font = `${sz * 0.65}px serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(BICONS[b.t] || '🏠', bx, by);
+
+        // Name label
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.beginPath(); ctx.roundRect(bx - sz * 0.9, by + sz * 0.65, sz * 1.8, 18, 6); ctx.fill();
+        ctx.fillStyle = '#ffd700'; ctx.font = `bold 10px 'Baloo 2',sans-serif`;
+        ctx.fillText(BNAMES[b.t] || b.t, bx, by + sz * 0.75 + 1);
+
+        // Farm progress bar
+        if (b.t === 'farm') {
+          const pct = b.timer / b.max;
+          ctx.fillStyle = 'rgba(0,0,0,0.5)';
+          ctx.beginPath(); ctx.roundRect(bx - sz * 0.85, by + sz * 0.88, sz * 1.7, 7, 4); ctx.fill();
+          if (pct >= 1) {
+            ctx.fillStyle = '#00e676';
+          } else {
+            const pg = ctx.createLinearGradient(bx - sz * 0.85, 0, bx + sz * 0.85, 0);
+            pg.addColorStop(0, '#f59e0b'); pg.addColorStop(1, '#22c55e');
+            ctx.fillStyle = pg;
+          }
+          ctx.beginPath(); ctx.roundRect(bx - sz * 0.85 + 1, by + sz * 0.88 + 1, Math.max(0, (sz * 1.7 - 2) * pct), 5, 3); ctx.fill();
+          if (pct >= 1) {
+            ctx.fillStyle = '#00e676'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('✓ Thu hoạch!', bx, by + sz * 1.12);
+          }
+        }
+        ctx.restore();
+        return { x: bx - sz, y: by - sz * 1.4, w: sz * 2, h: sz * 2.8 };
+      }
+
+      // ============================================================
+      // MAIN RENDER LOOP
+      // ============================================================
+      let animFrame = 0;
+      let particles = [];
+      let dragonAnims = {}; // per-dragon anim offset
+
+      function render() {
+        requestAnimationFrame(render);
+        animFrame++;
+        const cx = W / 2, cy = H * 0.52;
+        ctx.clearRect(0, 0, W, H);
+
+        // --- SỬA Ở ĐÂY: Thay drawIsland bằng ảnh nền ---
+        if (islandAssets.bg.complete) {
+          ctx.drawImage(islandAssets.bg, 0, 0, W, H);
+        } else {
+          // Vẫn gọi drawIsland làm nền tạm nếu ảnh chưa kịp load
+          drawIsland(ctx, W, H);
+        }
+
+        // Draw buildings
+        G.buildings.forEach((b, i) => {
+          b._bounds = drawBuilding(ctx, b, W, H, cx, cy);
+        });
+
+        // Draw dragons on island
+        const dpos = getDragonPositions(W, H, cx, cy);
+        G.dragons.forEach((d, i) => {
+          if (!dragonAnims[i]) dragonAnims[i] = i * 1.5;
+          const p = dpos[i % dpos.length];
+          const floatY = Math.sin(animFrame / 45 + dragonAnims[i]) * 8;
+          const dt = DM[d.tid] || DM.fire;
+          const sz = 50 + dt.r * 5;
+          drawDragonChibi(ctx, d.tid, p.x, p.y + floatY, sz, 1, false, false);
+          // HP bar... (giữ nguyên phần code HP và Name dưới đây)
+          const bw = 55, bh = 5;
+          const bx = p.x - bw / 2, by = p.y + floatY + sz * 0.52;
+          ctx.fillStyle = 'rgba(0,0,0,0.6)';
+          ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 3); ctx.fill();
+          const hpPct = d.hp / d.mhp;
+          const hcol = hpPct > 0.6 ? '#00e676' : hpPct > 0.3 ? '#ffd700' : '#ff1744';
+          ctx.fillStyle = hcol;
+          ctx.beginPath(); ctx.roundRect(bx + 1, by + 1, Math.max(0, (bw - 2) * hpPct), bh - 2, 2); ctx.fill();
+          ctx.fillStyle = 'rgba(0,0,0,0.65)';
+          ctx.beginPath(); ctx.roundRect(p.x - 28, by + 7, 56, 14, 5); ctx.fill();
+          ctx.fillStyle = '#fff'; ctx.font = 'bold 9px "Baloo 2",sans-serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+          ctx.fillText(d.n.slice(0, 10), p.x, by + 8.5);
+          ctx.fillStyle = '#ffd700';
+          ctx.beginPath(); ctx.arc(p.x + 28, p.y + floatY - sz * 0.45, 9, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#000'; ctx.font = 'bold 8px sans-serif'; ctx.textBaseline = 'middle';
+          ctx.fillText(d.lv, p.x + 28, p.y + floatY - sz * 0.45);
+        });
+
+        // Particles
+        particles = particles.filter(p => {
+          p.life -= 0.04;
+          if (p.life <= 0) return false;
+          p.x += p.vx; p.y += p.vy; p.vy += 0.15;
+          ctx.globalAlpha = p.life;
+          ctx.fillStyle = p.col;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+          return true;
+        });
+      }
+      function getDragonPositions(W, H, cx, cy) {
+        const rx = W * 0.35, ry = H * 0.2;
+        return [
+          { x: cx - rx * 0.55, y: cy - ry * 0.4 },
+          { x: cx + rx * 0.5, y: cy - ry * 0.5 },
+          { x: cx, y: cy - ry * 0.7 },
+          { x: cx - rx * 0.2, y: cy - ry * 0.2 },
+          { x: cx + rx * 0.2, y: cy - ry * 0.15 },
+          { x: cx - rx * 0.7, y: cy - ry * 0.1 },
+          { x: cx + rx * 0.65, y: cy - ry * 0.05 },
+          { x: cx, y: cy - ry * 0.4 },
+        ];
+      }
+
+      function spawnParticles(x, y, col, n = 12) {
+        for (let i = 0; i < n; i++) {
+          const a = Math.random() * Math.PI * 2, sp = 2 + Math.random() * 4;
+          particles.push({
+            x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3,
+            r: 3 + Math.random() * 4, col, life: 1
+          });
+        }
+      }
+
+      // ============================================================
+      // CLICK HANDLING
+      // ============================================================
+      canvas.addEventListener('click', e => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+        const W2 = canvas.width, H2 = canvas.height, cx = W2 / 2, cy = H2 * 0.52;
+
+        // Check buildings
+        G.buildings.forEach((b, i) => {
+          if (b._bounds) {
+            const bd = b._bounds;
+            if (mx >= bd.x && mx <= bd.x + bd.w && my >= bd.y && my <= bd.y + bd.h) {
+              onBuildingClick(i, mx, my);
+            }
+          }
+        });
+
+        // Check dragons
+        const dpos = getDragonPositions(W2, H2, cx, cy);
+        G.dragons.forEach((d, i) => {
+          const p = dpos[i % dpos.length];
+          const dt = DM[d.tid] || DM.fire;
+          const sz = (50 + dt.r * 5) * 0.6;
+          const dist = Math.sqrt((mx - p.x) ** 2 + (my - p.y) ** 2);
+          if (dist < sz) { openDetailPanel(i); }
+        });
+      });
+
+      function onBuildingClick(i, mx, my) {
+        const b = G.buildings[i];
+        if (b.t === 'farm') {
+          if (b.timer >= b.max) {
+            const got = 20 + b.lv * 15; G.food += got; b.timer = 0;
+            showToast(`🍖 Thu hoạch được ${got} thức ăn!`, '#4ade80');
+            floatText(mx, my + 52, `+${got} 🍖`, '#4ade80');
+            spawnParticles(mx, my + 52, '#4ade80');
+            updateHUD();
+          } else showToast(`🌾 Đang trồng... ${b.max - b.timer}s còn lại`, '#fbbf24');
+        } else if (b.t === 'arena') startBattle();
+        else if (b.t === 'hatch') openPanel('breed-ov');
+        else if (b.t === 'market') openPanel('shop-ov');
+        else showToast(`${BNAMES[b.t]} - Cấp ${b.lv}`, '#ffd700');
+      }
+
+      // ============================================================
+      // UI HELPERS
+      // ============================================================
+      function updateHUD() {
+        document.getElementById('hgold').textContent = G.gold.toLocaleString();
+        document.getElementById('hfood').textContent = G.food;
+        document.getElementById('hgem').textContent = G.gem;
+        document.getElementById('henergy').textContent = G.energy;
+      }
+      let toastTimer;
+      function showToast(msg, col = '#ffd700') {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.style.color = col;
+        t.classList.add('on');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('on'), 2500);
+      }
+      function floatText(x, y, txt, col = '#ffd700') {
+        const el = document.createElement('div');
+        el.className = 'ft'; el.textContent = txt;
+        el.style.cssText = `left:${x - 20}px;top:${y - 20}px;color:${col}`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1400);
+      }
+      function openPanel(id) { document.getElementById(id).classList.add('on') }
+      function closePanel(id) { document.getElementById(id).classList.remove('on') }
+      function setTab(btn, tab) {
+        document.querySelectorAll('.nbtn').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+      }
+
+      // ============================================================
+      // DRAGON COLLECTION PANEL
+      // ============================================================
+      function openDetailPanel(i) {
+        const d = G.dragons[i]; const dt = DM[d.tid] || DM.fire;
+        const el = document.getElementById('detail-content');
+        el.innerHTML = `
+    <div style="text-align:center">
+      <div style="font-family:'Fredoka One';font-size:20px;color:${dt.c[2]};margin-bottom:14px">${d.n}</div>
+      <canvas id="dcv" width="130" height="130" style="display:block;margin:0 auto"></canvas>
+      <div style="margin-top:8px;font-size:12px;color:#aaa">${dt.e} ${dt.e === '🔥' ? 'Lửa' : dt.n} · Cấp ${d.lv} · ${'⭐'.repeat(dt.r)}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;text-align:left">
+        ${[['❤️ Máu', `${d.hp}/${d.mhp}`, '#ff6b6b'], ['🗡️ Sát thương', `${10 + d.lv * 5}`, '#ffa502'],
+          ['✨ Kỹ năng', dt.skill, '#a29bfe'], ['📈 XP', `${d.xp}/100`, '#ffd700']].map(([lbl, val, col]) => `
+        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:9px">
+          <div style="font-size:10px;color:#666">${lbl}</div>
+          <div style="font-size:14px;font-weight:800;color:${col};margin-top:2px">${val}</div>
+        </div>`).join('')}
+      </div>
+      <div style="height:5px;background:#1a1a2e;border-radius:3px;margin:10px 0">
+        <div style="height:100%;width:${d.xp}%;background:linear-gradient(90deg,#ffd700,#ff6b35);border-radius:3px;transition:.5s"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+        <button class="abtn green" onclick="feedDragon(${i})">🍖 Cho Ăn (10 🍖)</button>
+        <button class="abtn orange" onclick="closePanel('detail-ov');startBattleWith(${i})">⚔️ Chiến Đấu</button>
+      </div>
+    </div>`;
+        openPanel('detail-ov');
+        const cv = document.getElementById('dcv');
+        if (cv) { const c = cv.getContext('2d'); drawDragonChibi(c, d.tid, 65, 90, 110); }
+      }
+
+      // Render dragon collection
+      document.getElementById('dragon-ov').addEventListener('click', e => {
+        if (e.target.id === 'dragon-ov') closePanel('dragon-ov');
+      });
+      function renderDragonCol() {
+        const el = document.getElementById('dragon-col-content');
+        if (!document.getElementById('dragon-ov').classList.contains('on')) return;
+        el.innerHTML = `
+    <p style="text-align:center;color:#888;font-size:12px;margin-bottom:12px">Bạn có <b style="color:#ffd700">${G.dragons.length}</b> con rồng</p>
+    <div class="dgrid">
+    ${G.dragons.map((d, i) => {
+          const dt = DM[d.tid] || DM.fire; return `
+      <div class="dcard" onclick="closePanel('dragon-ov');openDetailPanel(${i})">
+        <canvas id="dcolcv${i}" width="68" height="68" style="display:block;margin:0 auto"></canvas>
+        <div class="dname">${d.n.slice(0, 12)}</div>
+        <div class="delem">${dt.e} · ${'⭐'.repeat(dt.r)}</div>
+        <div class="dlv">Lv.${d.lv}</div>
+        <div class="sbar-wrap" style="width:70px;margin:5px auto 0">
+          <div class="sbar" style="width:${(d.hp / d.mhp) * 100}%;background:${d.hp / d.mhp > 0.5 ? '#22c55e' : '#ef4444'}"></div>
+        </div>
+      </div>`}).join('')}
+    </div>`;
+        G.dragons.forEach((d, i) => {
+          const cv = document.getElementById(`dcolcv${i}`);
+          if (cv) { const c = cv.getContext('2d'); drawDragonChibi(c, d.tid, 34, 52, 80); }
+        });
+      }
+      document.getElementById('dragon-ov').addEventListener('transitionend', renderDragonCol);
+
+      // ============================================================
+      // SHOP PANEL
+      // ============================================================
+      function renderShop() {
+        const el = document.getElementById('shop-content');
+        const buyable = DT.filter(t => t.cost > 0);
+        el.innerHTML = `
+    <div style="font-size:12px;color:#888;text-align:center;margin-bottom:14px">Mua rồng mới cho đảo của bạn!</div>
+    <div class="dgrid" style="grid-template-columns:repeat(4,1fr)">
+    ${buyable.map(t => `
+      <div class="dcard" onclick="buyDragon('${t.id}')">
+        <canvas id="scv${t.id}" width="60" height="60" style="display:block;margin:0 auto"></canvas>
+        <div class="dname" style="font-size:10px">${t.n}</div>
+        <div style="font-size:10px;color:#ffd700;margin-top:3px;font-weight:800">🪙 ${t.cost}</div>
+        <div style="font-size:9px;color:#888">${'⭐'.repeat(t.r)}</div>
+      </div>`).join('')}
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:14px;margin-top:16px">
+      <div style="font-size:13px;font-weight:800;color:#ffd700;margin-bottom:10px">🍖 Mua Thức Ăn</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${[[50, 200], [150, 500], [500, 1500]].map(([f, g]) => `
+        <button class="abtn green" style="font-size:11px" onclick="buyFood(${f},${g})">${f}🍖 = ${g}🪙</button>`).join('')}
+      </div>
+    </div>`;
+        buyable.forEach(t => {
+          const cv = document.getElementById(`scv${t.id}`);
+          if (cv) { const c = cv.getContext('2d'); drawDragonChibi(c, t.id, 30, 46, 72); }
+        });
+      }
+      document.getElementById('shop-ov').addEventListener('transitionend', e => {
+        if (e.target.id === 'shop-ov') renderShop();
+      });
+      function buyDragon(tid) {
+        const t = DM[tid]; if (!t) return;
+        if (G.gold < t.cost) { showToast(`❌ Cần ${t.cost} vàng!`, '#ef4444'); return; }
+        if (G.dragons.length >= 12) { showToast('❌ Đảo đầy! Tối đa 12 rồng.', '#ef4444'); return; }
+        G.gold -= t.cost;
+        G.dragons.push({ tid: t.id, lv: 1, hp: 40 + t.r * 5, mhp: 40 + t.r * 5, xp: 0, n: t.n + ' Mới' });
+        showToast(`🎉 Đã mua ${t.n}!`, t.c[2]);
+        floatText(W / 2, H / 2, `+1 ${t.n}`, t.c[2]);
+        spawnParticles(W / 2, H / 2, t.c[2], 20);
+        updateHUD(); closePanel('shop-ov');
+      }
+      function buyFood(amount, cost) {
+        if (G.gold < cost) { showToast(`❌ Không đủ vàng!`, '#ef4444'); return; }
+        G.gold -= cost; G.food += amount;
+        showToast(`🍖 Mua ${amount} thức ăn!`, '#4ade80'); updateHUD();
+      }
+
+      // ============================================================
+      // DRAGON FEEDING
+      // ============================================================
+      function feedDragon(i) {
+        const d = G.dragons[i];
+        if (G.food < 10) { showToast('❌ Không đủ thức ăn! Cần 10 🍖', '#ef4444'); return; }
+        G.food -= 10; d.xp += 15;
+        if (d.xp >= 100) {
+          d.lv++; d.xp -= 100; d.mhp += 20; d.hp = d.mhp;
+          showToast(`🎉 ${d.n} lên cấp ${d.lv}!`, '#ffd700');
+          floatText(W / 2, H / 2, `LEVEL UP! Lv.${d.lv}`, '#ffd700');
+          spawnParticles(W / 2, H / 2, '#ffd700', 25);
+        } else showToast(`🍖 +15 XP cho ${d.n}`, '#4ade80');
+        updateHUD(); openDetailPanel(i);
+      }
+
+      // ============================================================
+      // BREEDING
+      // ============================================================
+      function renderBreed() {
+        const el = document.getElementById('breed-content');
+        if (!document.getElementById('breed-ov').classList.contains('on')) return;
+        if (G.eggReady && G.breedResult) {
+          const rt = DM[G.breedResult] || DM.fire;
+          el.innerHTML = `
+      <div style="text-align:center;padding:16px">
+        <div style="font-size:60px;cursor:pointer;animation:spin .8s linear infinite" onclick="hatchEgg()">🥚</div>
+        <div style="font-size:14px;color:#ffd700;font-weight:800;margin-top:12px">Trứng đã nở! Nhấn để nhận rồng!</div>
+        <div style="font-size:12px;color:${rt.c[2]};margin-top:6px">${rt.e} ${rt.n} đang chờ bạn...</div>
+        <button class="abtn purple" style="margin-top:14px" onclick="hatchEgg()">🐣 Nhận Rồng!</button>
+      </div>
+      <style>@keyframes spin{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}</style>`;
+          return;
+        }
+        if (G.breedTimer > 0) {
+          const pct = Math.max(0, 1 - G.breedTimer / 30);
+          el.innerHTML = `
+      <div style="text-align:center;padding:20px">
+        <div style="font-size:50px">🥚</div>
+        <div style="font-size:14px;color:#ffd700;font-weight:800;margin:10px 0">Đang ấp trứng...</div>
+        <div style="font-size:12px;color:#888">Còn ${G.breedTimer} giây</div>
+        <div style="background:#1a1a2e;height:8px;border-radius:4px;margin:12px 0;width:200px;margin:12px auto">
+          <div style="background:linear-gradient(90deg,#ffd700,#ff6b35);height:100%;border-radius:4px;width:${pct * 100}%;transition:width 1s"></div>
+        </div>
+        <button class="abtn purple" style="font-size:11px" onclick="G.gem>0&&G.gem--&&(G.breedTimer=1)&&updateHUD()">💎 Dùng Gem để nhanh hơn</button>
+      </div>`;
+          return;
+        }
+        const d1 = G.breedS1 !== null ? G.dragons[G.breedS1] : null;
+        const d2 = G.breedS2 !== null ? G.dragons[G.breedS2] : null;
+        el.innerHTML = `
+    <div style="font-size:11px;color:#888;text-align:center;margin-bottom:10px">Ghép 2 rồng để tạo rồng mới!</div>
+    <div class="bslots">
+      <div class="bslot ${d1 ? 'filled' : ''}" id="bs1" onclick="breedTarget=1">
+        ${d1 ? `<canvas id="bscv1" width="60" height="60"></canvas><div style="font-size:9px;color:#ffd700;margin-top:2px">${d1.n.slice(0, 8)}</div>` : '<div style="font-size:22px">+</div><div>Chọn 1</div>'}
+      </div>
+      <div class="bplus">+</div>
+      <div class="bslot ${d2 ? 'filled' : ''}" id="bs2" onclick="breedTarget=2">
+        ${d2 ? `<canvas id="bscv2" width="60" height="60"></canvas><div style="font-size:9px;color:#ffd700;margin-top:2px">${d2.n.slice(0, 8)}</div>` : '<div style="font-size:22px">+</div><div>Chọn 2</div>'}
+      </div>
+    </div>
+    ${d1 && d2 ? `
+    <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:12px;text-align:center;margin:10px 0">
+      <div style="font-size:11px;color:#888">Kết quả có thể:</div>
+      <div style="font-size:13px;color:#ffd700;font-weight:800;margin-top:4px">${getBreedPreview(d1.tid, d2.tid)}</div>
+    </div>
+    <div style="text-align:center;margin-top:10px">
+      <button class="abtn orange" onclick="startBreeding()" style="font-size:14px;padding:11px 24px">🥚 Bắt Đầu Lai Tạo!</button>
+    </div>`: ``}
+    <div style="border-top:1px solid rgba(255,255,255,.1);margin-top:14px;padding-top:12px">
+      <div style="font-size:11px;color:#888;margin-bottom:8px">Chọn rồng (nhấn để thêm vào ô):</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${G.dragons.map((d, i) => {
+          const dt = DM[d.tid] || DM.fire; return `
+        <div onclick="addBreedSlot(${i})" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:5px 9px;cursor:pointer;font-size:11px;color:${dt.c[2]};transition:.2s" onmouseover="this.style.borderColor='#ffd700'" onmouseout="this.style.borderColor='rgba(255,255,255,.1)'">${dt.e} ${d.n.slice(0, 8)} Lv${d.lv}</div>`
+        }).join('')}
+      </div>
+    </div>`;
+        if (d1) { const cv = document.getElementById('bscv1'); if (cv) { const c = cv.getContext('2d'); drawDragonChibi(c, d1.tid, 30, 46, 72); } }
+        if (d2) { const cv = document.getElementById('bscv2'); if (cv) { const c = cv.getContext('2d'); drawDragonChibi(c, d2.tid, 30, 46, 72); } }
+      }
+      let breedTarget = 1;
+      function addBreedSlot(i) {
+        if (breedTarget === 1) G.breedS1 = i;
+        else G.breedS2 = i;
+        breedTarget = breedTarget === 1 ? 2 : 1;
+        renderBreed();
+      }
+      function getBreedPreview(t1, t2) {
+        const m = DT.find(d => d.bp && ((d.bp[0] === t1 && d.bp[1] === t2) || (d.bp[0] === t2 && d.bp[1] === t1)));
+        if (m) return `✨ ${m.n} (${m.e}) — Đặc biệt!`;
+        return `Rồng ngẫu nhiên... có thể rất hiếm!`;
+      }
+      function startBreeding() {
+        if (G.breedS1 === null || G.breedS2 === null) { showToast('❌ Chọn đủ 2 rồng!', '#ef4444'); return; }
+        const d1 = G.dragons[G.breedS1], d2 = G.dragons[G.breedS2];
+        const m = DT.find(d => d.bp && ((d.bp[0] === d1.tid && d.bp[1] === d2.tid) || (d.bp[0] === d2.tid && d.bp[1] === d1.tid)));
+        if (m) G.breedResult = m.id;
+        else {
+          const r = Math.random();
+          if (r < 0.1) G.breedResult = DT.filter(d => d.r >= 4)[Math.floor(Math.random() * 3)].id;
+          else if (r < 0.3) G.breedResult = DT.filter(d => d.r === 3)[Math.floor(Math.random() * 2)].id;
+          else G.breedResult = DT.filter(d => d.r <= 2 && !d.bp)[Math.floor(Math.random() * 6)].id;
+        }
+        G.breedTimer = 10; G.eggReady = false;
+        showToast('🥚 Lai tạo bắt đầu! 10 giây...', '#a78bfa');
+        renderBreed();
+      }
+      function hatchEgg() {
+        if (!G.breedResult) return;
+        const t = DM[G.breedResult] || DM.fire;
+        if (G.dragons.length >= 12) { showToast('❌ Đảo đầy!', '#ef4444'); return; }
+        G.dragons.push({ tid: t.id, lv: 1, hp: 40 + t.r * 10, mhp: 40 + t.r * 10, xp: 0, n: `${t.n} (${'⭐'.repeat(t.r)})` });
+        G.breedResult = null; G.eggReady = false; G.breedS1 = null; G.breedS2 = null;
+        showToast(`🎉 ${t.n} xuất hiện! ${t.r}⭐`, t.c[2]);
+        floatText(W / 2, H / 3, `✨ ${t.n}!`, t.c[2]);
+        spawnParticles(W / 2, H / 3, t.c[2], 30);
+        closePanel('breed-ov'); updateHUD();
+      }
+      document.getElementById('breed-ov').addEventListener('transitionend', e => {
+        if (e.target.id === 'breed-ov') renderBreed();
+      });
+
+      // ============================================================
+      // MAP PANEL
+      // ============================================================
+      const ENEMIES = [
+        { n: 'Rồng Hoang Dã 🔥', tid: 'fire', lv: 1, hp: 50, rw: { g: 80, f: 10, xp: 20 } },
+        { n: 'Rồng Rừng 🌿', tid: 'earth', lv: 2, hp: 80, rw: { g: 150, f: 20, xp: 40 } },
+        { n: 'Rồng Băng ❄️', tid: 'ice', lv: 3, hp: 120, rw: { g: 250, f: 30, xp: 70 } },
+        { n: 'Rồng Tối 🌑', tid: 'dark', lv: 5, hp: 200, rw: { g: 400, f: 50, xp: 120 } },
+        { n: 'Rồng Ác Ma 👿', tid: 'demon', lv: 8, hp: 350, rw: { g: 700, f: 80, xp: 200 } },
+      ];
+      function renderMap() {
+        const el = document.getElementById('map-content');
+        el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    ${ENEMIES.map((e, i) => {
+          const locked = i >= G.mapLv, done = i < G.mapLv - 1, cur = i === G.mapLv - 1;
+          const dt = DM[e.tid] || DM.fire;
+          return `<div onclick="${locked ? `showToast('🔒 Chưa mở khóa!','#ef4444')` : `closePanel('map-ov');startBattleEnemy(${i})`}" style="
+        background:${cur ? 'rgba(255,215,0,.08)' : done ? 'rgba(34,197,94,.05)' : 'rgba(255,255,255,.03)'};
+        border:1.5px solid ${cur ? '#ffd700' : done ? '#22c55e' : 'rgba(255,255,255,.1)'};
+        border-radius:14px;padding:13px;cursor:${locked ? 'not-allowed' : 'pointer'};
+        opacity:${locked ? 0.45 : 1};transition:.2s">
+        <div style="font-size:20px">${locked ? '🔒' : done ? '✅' : cur ? '⚔️' : '❓'}</div>
+        <div style="font-weight:800;font-size:12px;margin:5px 0;color:${dt.c[2]}">${e.n}</div>
+        <div style="font-size:10px;color:#888">Cấp ${e.lv} · ${e.hp} HP</div>
+        <div style="font-size:10px;color:#ffd700;margin-top:4px">+${e.rw.g}🪙 +${e.rw.f}🍖</div>
+      </div>`;
+        }).join('')}
+    </div>
+    <div style="margin-top:12px;padding:10px;background:rgba(255,255,255,.04);border-radius:10px;font-size:11px;color:#888">
+      ⚡ Mỗi trận tốn 1 năng lượng · Năng lượng hồi theo thời gian
+    </div>`;
+      }
+      document.getElementById('map-ov').addEventListener('transitionend', e => {
+        if (e.target.id === 'map-ov') renderMap();
+      });
+
+      // ============================================================
+      // RANK PANEL
+      // ============================================================
+      function renderRank() {
+        const fakeR = [
+          { n: 'DragonLord888', d: 18, w: 423, b: '👑' },
+          { n: 'RồngChúa2025', d: 14, w: 310, b: '🥇' },
+          { n: 'VietDragon', d: 11, w: 245, b: '🥈' },
+          { n: 'BạnOi (Bạn)', d: G.dragons.length, w: G.wins, b: '🥉' },
+          { n: 'TậpSự_Pro', d: 6, w: 88, b: '🏅' },
+          { n: 'NewPlayer001', d: 3, w: 15, b: '🏅' },
+        ];
+        document.getElementById('rank-content').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px">
+    ${fakeR.map((r, i) => `
+      <div style="display:flex;align-items:center;gap:10px;
+        background:${i === 3 ? 'rgba(255,215,0,.07)' : 'rgba(255,255,255,.03)'};
+        border:1.5px solid ${i === 3 ? '#ffd700' : 'rgba(255,255,255,.08)'};
+        border-radius:12px;padding:10px 14px">
+        <div style="font-size:22px;width:28px;text-align:center">${r.b}</div>
+        <div style="flex:1">
+          <div style="font-weight:800;font-size:13px;color:${i === 3 ? '#ffd700' : '#fff'}">${r.n}</div>
+          <div style="font-size:10px;color:#666">${r.d} rồng · ${r.w} thắng</div>
+        </div>
+        <div style="font-size:20px;font-weight:900;color:${i === 3 ? '#ffd700' : '#333'}">#${i + 1}</div>
+      </div>`).join('')}
+    </div>`;
+      }
+      document.getElementById('rank-ov').addEventListener('transitionend', e => {
+        if (e.target.id === 'rank-ov') renderRank();
+      });
+
+      // ============================================================
+      // BATTLE SYSTEM
+      // ============================================================
+      let BS = null;
+      let bAnimId = null;
+      let bCamShake = 0;
+
+      function startBattle() {
+        startBattleEnemy(Math.min(G.mapLv - 1, ENEMIES.length - 1));
+      }
+      function startBattleWith(dragonIdx) {
+        startBattleEnemy(Math.min(G.mapLv - 1, ENEMIES.length - 1), dragonIdx);
+      }
+      function startBattleEnemy(enemyIdx, dragonIdx = 0) {
+        if (G.dragons.length === 0) { showToast('❌ Bạn chưa có rồng nào!', '#ef4444'); return; }
+        if (G.energy <= 0) { showToast('❌ Hết năng lượng!', '#ef4444'); return; }
+        G.energy--; updateHUD();
+        const pd = G.dragons[dragonIdx];
+        const ed = JSON.parse(JSON.stringify(ENEMIES[enemyIdx]));
+        BS = {
+          player: { ...pd, hp: pd.hp, mhp: pd.mhp, xp: pd.xp },
+          enemy: ed,
+          turn: 'player', over: false,
+          pdIdx: dragonIdx, edIdx: enemyIdx,
+          log: [], pAnim: 0, eAnim: 0,
+          pHit: 0, eHit: 0,
+        };
+        document.getElementById('battle').classList.add('on');
+        updateBattleUI();
+        bLog(`⚔️ ${BS.player.n} vs ${BS.enemy.n}! Chiến đấu bắt đầu!`);
+        renderBattle();
+      }
+      function renderBattle() {
+        if (!BS) return;
+        const bc = document.getElementById('bc');
+        const bctx = bc.getContext('2d');
+        const W = bc.width, H = bc.height;
+        bctx.clearRect(0, 0, W, H);
+
+        // BG
+        const bg = bctx.createLinearGradient(0, 0, 0, H);
+        bg.addColorStop(0, '#0f0824'); bg.addColorStop(1, '#1a0a3e');
+        bctx.fillStyle = bg; bctx.fillRect(0, 0, W, H);
+
+        // Arena floor
+        bctx.fillStyle = '#1a3a1a';
+        bctx.beginPath(); bctx.ellipse(W / 2, H - 25, W * 0.48, 28, 0, 0, Math.PI * 2); bctx.fill();
+        bctx.strokeStyle = 'rgba(56,200,100,.3)'; bctx.lineWidth = 2;
+        bctx.beginPath(); bctx.ellipse(W / 2, H - 25, W * 0.48, 28, 0, 0, Math.PI * 2); bctx.stroke();
+        // Center line
+        bctx.strokeStyle = 'rgba(255,215,0,.15)'; bctx.lineWidth = 1; bctx.setLineDash([8, 6]);
+        bctx.beginPath(); bctx.moveTo(W / 2, H - 55); bctx.lineTo(W / 2, 10); bctx.stroke();
+        bctx.setLineDash([]);
+
+        // Camera shake
+        let sx = 0, sy = 0;
+        if (bCamShake > 0) { sx = (Math.random() - 0.5) * bCamShake * 2; sy = (Math.random() - 0.5) * bCamShake; bCamShake--; }
+
+        // Player dragon
+        const pdt = DM[BS.player.tid] || DM.fire;
+        const pSz = 90;
+        const pGlow = BS.pHit > 0;
+        if (pGlow) bCamShake = 3;
+        drawDragonChibi(bctx, BS.player.tid, 130 + sx, H - 65 + sy, pSz, 1, pGlow, false);
+        if (BS.pHit > 0) BS.pHit--;
+
+        // Enemy dragon (flipped)
+        const eSz = 90;
+        const eGlow = BS.eHit > 0;
+        drawDragonChibi(bctx, BS.enemy.tid, W - 130 - sx, H - 65 - sy, eSz, -1, eGlow, false);
+        if (BS.eHit > 0) BS.eHit--;
+
+        // VS
+        bctx.save();
+        bctx.font = 'bold 22px Fredoka One,sans-serif';
+        bctx.textAlign = 'center'; bctx.textBaseline = 'middle';
+        bctx.fillStyle = 'rgba(255,215,0,0.7)';
+        bctx.fillText('VS', W / 2, H / 2 - 10);
+        bctx.restore();
+
+        if (!BS.over) bAnimId = requestAnimationFrame(renderBattle);
+      }
+      function updateBattleUI() {
+        if (!BS) return;
+        const p = BS.player, e = BS.enemy;
+        document.getElementById('bpname').textContent = '🐉 ' + p.n;
+        document.getElementById('bename').textContent = e.n;
+        document.getElementById('bphp').style.width = Math.max(0, p.hp / p.mhp * 100) + '%';
+        document.getElementById('behp').style.width = Math.max(0, e.hp / e.hp > 0 ? (e.hp / (ENEMIES[BS.edIdx].hp)) * 100 : 0) + '%';
+        document.getElementById('bphpt').textContent = `HP ${Math.max(0, p.hp)}/${p.mhp}`;
+        document.getElementById('behpt').textContent = `HP ${Math.max(0, e.hp)}/${ENEMIES[BS.edIdx].hp}`;
+        // Fix enemy hp bar
+        const maxEhp = ENEMIES[BS.edIdx].hp;
+        document.getElementById('behp').style.width = Math.max(0, (e.hp / maxEhp) * 100) + '%';
+        document.getElementById('behpt').textContent = `HP ${Math.max(0, e.hp)}/${maxEhp}`;
+      }
+      function bLog(msg) {
+        const l = document.getElementById('blog');
+        const d = document.createElement('div'); d.textContent = msg;
+        l.appendChild(d); l.scrollTop = l.scrollHeight;
+      }
+      function calcDmg(atk, def, base) {
+        const w = WEAK[atk] || [];
+        if (w.includes(def)) return Math.floor(base * 0.6);
+        const wd = WEAK[def] || [];
+        if (wd.includes(atk)) return Math.floor(base * 1.6);
+        return base;
+      }
+      function doAttack(type) {
+        if (!BS || BS.over || BS.turn !== 'player') return;
+        const p = BS.player, e = BS.enemy;
+        let dmg = 10 + p.lv * 5;
+        if (type === 'skill') { dmg = Math.floor(dmg * 1.9); bLog(`✨ ${p.n} dùng ${(DM[p.tid] || DM.fire).skill}!`); }
+        else bLog(`⚔️ ${p.n} tấn công!`);
+        dmg = calcDmg(p.tid, e.tid, dmg);
+        dmg = Math.floor(dmg * (0.8 + Math.random() * 0.4));
+        e.hp -= dmg; BS.eHit = 6;
+        bLog(`💥 Gây ${dmg} sát thương!`);
+        updateBattleUI();
+        if (e.hp <= 0) { winBattle(); return; }
+        BS.turn = 'enemy';
+        setTimeout(() => {
+          if (!BS) return;
+          let ed = 8 + e.lv * 4;
+          ed = calcDmg(e.tid, p.tid, ed);
+          ed = Math.floor(ed * (0.8 + Math.random() * 0.4));
+          p.hp -= ed; BS.pHit = 6;
+          bLog(`💀 ${e.n} phản công! Gây ${ed} sát thương!`);
+          updateBattleUI();
+          BS.turn = 'player';
+          if (p.hp <= 0) loseBattle();
+        }, 700);
+      }
+      function winBattle() {
+        BS.over = true;
+        const rw = ENEMIES[BS.edIdx].rw;
+        G.gold += rw.g; G.food += rw.f; G.wins++;
+        if (G.mapLv <= BS.edIdx + 1) G.mapLv = BS.edIdx + 2;
+        const pd = G.dragons[BS.pdIdx];
+        pd.xp = (pd.xp || 0) + rw.xp;
+        while (pd.xp >= 100) { pd.lv++; pd.xp -= 100; pd.mhp += 20; }
+        pd.hp = Math.max(1, BS.player.hp);
+        bLog(`🏆 CHIẾN THẮNG! +${rw.g}🪙 +${rw.f}🍖 +${rw.xp}XP`);
+        updateHUD();
+        setTimeout(() => { endBattle(); showToast(`🏆 Thắng! +${rw.g}🪙`, '#ffd700'); spawnParticles(W / 2, H / 2, '#ffd700', 30); }, 1500);
+      }
+      function loseBattle() {
+        BS.over = true;
+        const pd = G.dragons[BS.pdIdx];
+        pd.hp = Math.max(1, Math.floor(pd.mhp * 0.15));
+        bLog(`💀 THUA! Hãy luyện tập rồng mạnh hơn.`);
+        setTimeout(() => { endBattle(); showToast('💀 Thua rồi! Nuôi rồng thêm nào.', '#ef4444'); }, 1500);
+      }
+      function endBattle() {
+        BS = null; if (bAnimId) cancelAnimationFrame(bAnimId); bAnimId = null;
+        document.getElementById('battle').classList.remove('on');
+        document.getElementById('blog').innerHTML = '';
+      }
+
+      // ============================================================
+      // GAME LOOP (TIMERS)
+      // ============================================================
+      setInterval(() => {
+        G.buildings.forEach(b => {
+          if (b.t === 'farm' && b.timer < b.max) b.timer++;
+        });
+        if (G.breedTimer > 0) {
+          G.breedTimer--;
+          if (G.breedTimer <= 0) {
+            G.eggReady = true;
+            showToast('🥚 Trứng đã sẵn sàng! Vào Lai Tạo để nhận.', '#a78bfa');
+            if (document.getElementById('breed-ov').classList.contains('on')) renderBreed();
+          } else if (document.getElementById('breed-ov').classList.contains('on')) renderBreed();
+        }
+      }, 1000);
+
+      // Gold income passive
+      setInterval(() => {
+        const earned = 5 + G.dragons.reduce((s, d) => s + d.lv, 0) * 2;
+        G.gold += earned; updateHUD();
+        floatText(document.getElementById('hgold').getBoundingClientRect().right - 30, 58, `+${earned}🪙`, '#ffd700');
+      }, 8000);
+
+      // Energy regen
+      setInterval(() => {
+        if (G.energy < 10) { G.energy++; updateHUD(); showToast('⚡ +1 Năng lượng nạp lại!', '#fbbf24'); }
+      }, 30000);
+
+      // ============================================================
+      // START
+      // ============================================================
+      updateHUD();
+      render();
+      setTimeout(() => showToast('🐉 Chào mừng đến Đảo Rồng! Nhấn vào rồng để xem thông tin.', '#ffd700'), 1200);
+    </script>
+  </body>
+
+  </html>
